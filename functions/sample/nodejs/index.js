@@ -28,3 +28,7 @@
        console.log(err);
      });
  }
+
+ function getAllDealerships(cloudant) {
+     cloudant
+ }

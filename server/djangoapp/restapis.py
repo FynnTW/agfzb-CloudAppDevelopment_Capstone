@@ -14,9 +14,9 @@ from requests.auth import HTTPBasicAuth
 
 
 # Create a get_dealers_from_cf method to get dealers from a cloud function
-# def get_dealers_from_cf(url, **kwargs):
-# - Call get_request() with specified arguments
-# - Parse JSON results into a CarDealer object list
+def get_dealers_from_cf(url, **kwargs):
+    dealer_doc = dealer
+    pass
 
 
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
