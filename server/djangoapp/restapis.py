@@ -3,29 +3,49 @@ import json
 # import related models here
 from requests.auth import HTTPBasicAuth
 from .models import CarDealer, DealerReview
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from ibm_watson.natural_language_understanding_v1 import Features, SentimentOptions
 
 
 # Create a `get_request` to make HTTP GET requests
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
 #                                     auth=HTTPBasicAuth('apikey', api_key))
-def get_request(url, **kwargs):
+def get_request(url, api_key=None, **kwargs):
     print(kwargs)
     print("GET from {} ".format(url))
     api_key = "S36x4mKcIYgxTkNqvudKgQjrnb-7sxY936XqseHsFgA9"
+    json_data = []
     try:
         # Call get method of requests library with URL and parameters
-        response = requests.get(url, headers={'Content-Type': 'application/json'},
+        if api_key is not None:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
                                     params=kwargs, auth=HTTPBasicAuth('apikey', api_key))
+        else:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=kwargs)
+        status_code = response.status_code
+        print("With status {} ".format(status_code))
+        json_data = json.loads(response.text)
     except:
         # If any error occurs
         print("Network exception occurred")
-    status_code = response.status_code
-    print("With status {} ".format(status_code))
-    json_data = json.loads(response.text)
     return json_data
 
 # Create a `post_request` to make HTTP POST requests
 # e.g., response = requests.post(url, params=kwargs, json=payload)
+def post_request(url, json_payload, **kwargs):
+    json_data = []
+    try:
+        response = requests.post(url, params=kwargs, json=json_payload)
+        json_data = json.loads(response.text)
+    except:
+        # If any error occurs
+        print("Network exception occurred")
+    return json_data
+
+
+
 
 def get_dealer_by_id(url, dealerId):
     results = []
@@ -93,7 +113,8 @@ def get_dealer_reviews_from_cf(url, dealerId):
                                    car_make=dealer_doc["car_make"],
                                    car_model=dealer_doc["car_model"], 
                                    car_year=dealer_doc["car_year"],
-                                   sentiment="")
+                                   sentiment=analyze_review_sentiments(dealer_doc["review"])
+                                   )
             results.append(dealer_obj)
     return results
 
@@ -102,15 +123,20 @@ def get_dealer_reviews_from_cf(url, dealerId):
 # def analyze_review_sentiments(text):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
-def analyze_review_sentiments(text):
-    params = dict()
-    params["text"] = kwargs["text"]
-    params["version"] = kwargs["version"]
-    params["features"] = kwargs["features"]
-    params["return_analyzed_text"] = kwargs["return_analyzed_text"]
-    response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
-                                        auth=HTTPBasicAuth('apikey', api_key))
-    return response
+def analyze_review_sentiments(dealerreview):
+    API_KEY = "SKN5Vvf_MjMPT8uCUEpJQCvA_HUJLpANccM2KmTakWSK"
+    URL = 'https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/c9ce8039-4e6f-45e4-8f0c-04d87e4581ee'
+    authenticator = IAMAuthenticator(API_KEY)
+    natural_language_understanding = NaturalLanguageUnderstandingV1(version='2021-08-01', authenticator=authenticator)
+    natural_language_understanding.set_service_url(URL)
+    try:
+        response = natural_language_understanding.analyze(text=dealerreview, features=Features(
+            sentiment=SentimentOptions(targets=[dealerreview]))).get_result()
+        label = json.dumps(response)
+        label = response['sentiment']['document']['label']
+        return(label)
+    except: # review can be too short for analysis
+        return ('')
 
 
 

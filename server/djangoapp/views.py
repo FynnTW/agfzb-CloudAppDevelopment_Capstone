@@ -96,10 +96,14 @@ def get_dealer_details(request, dealerId):
         # Get dealers from the URL
         reviews = restapis.get_dealer_reviews_from_cf(url, dealerId)
         # Concat all dealer's short name
-        review_texts = '\n'.join([review.review for review in reviews])
+        review_texts = '\n'.join([review.review + " " + review.sentiment for review in reviews])
         # Return a list of dealer short name
         return HttpResponse(review_texts)
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
 # ...
-
+def add_review(request, dealerId):
+    review = {}
+    json_payload = {}
+    if request.method == "POST":
+        
