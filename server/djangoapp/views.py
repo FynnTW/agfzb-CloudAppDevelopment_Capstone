@@ -105,5 +105,11 @@ def get_dealer_details(request, dealerId):
 def add_review(request, dealerId):
     review = {}
     json_payload = {}
+    url = f"https://fynnpapadopo-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
     if request.method == "POST":
-        
+        review["time"] = datetime.utcnow().isoformat()
+        review["dealership"] = dealerId
+        review["review"] = "This is a great car dealer"
+        json_payload["review"] = review
+        result = post_request(url, json_payload, dealerId=dealerId)
+        print(result)
