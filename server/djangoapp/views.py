@@ -90,8 +90,15 @@ def get_dealerships(request):
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
 # ...
-def get_dealer_details(request, dealer_id):
-    pass
+def get_dealer_details(request, dealerId):
+    if request.method == "GET":
+        url = f"https://fynnpapadopo-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews?id={dealerId}"
+        # Get dealers from the URL
+        reviews = restapis.get_dealer_reviews_from_cf(url, dealerId)
+        # Concat all dealer's short name
+        review_texts = '\n'.join([review.review for review in reviews])
+        # Return a list of dealer short name
+        return HttpResponse(review_texts)
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
 # ...
