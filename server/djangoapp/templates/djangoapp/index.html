@@ -56,7 +56,32 @@
         </div>
     </nav>
     <!--Add a dealer table here -->
-
+    <table class="table" id="table" data-filter-control="true">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th data-field="name" data-filter-control="input"> Dealer Name </th>
+                <th data-field="city" data-filter-control="input"> City </th>
+                <th> Address </th>
+                <th data-field="zip" data-filter-control="input"> Zip </th>
+                <th data-field="state" data-filter-control="select"> State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealer in dealerships %}
+            <tr>
+                <td>{{ dealer.id}}</td>
+                <td> <a href="{% url 'djangoapp:dealer_details' dealer.id %}">
+                        {{ dealer.full_name }}
+                    </a></td>
+                <td>{{ dealer.city }}</td>
+                <td>{{ dealer.address}} </td>
+                <td>{{ dealer.zip}} </td>
+                <td>{{ dealer.state}} </td>
+            </tr>
+            {% endfor%}
+        </tbody>
+    </table>
     </body>
     <footer class="container-fluid text-center">
         <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>

@@ -65,7 +65,7 @@ def post_review():
 
     # Save the review data as a new document in the Cloudant database
     db.create_document(review_data)
-
+    
     return jsonify({"message": "Review posted successfully"}), 201
 
 if __name__ == '__main__':

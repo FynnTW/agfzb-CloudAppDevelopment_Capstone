@@ -10,6 +10,7 @@ from datetime import datetime
 import logging
 import json
 from . import restapis
+from django.views.decorators.csrf import csrf_exempt
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -77,14 +78,16 @@ def registration_request(request):
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
+    context={}
     if request.method == "GET":
         url = "https://fynnpapadopo-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
         # Get dealers from the URL
         dealerships = restapis.get_dealers_from_cf(url)
         # Concat all dealer's short name
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        context['dealerships'] = dealerships
         # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        return render(request, 'djangoapp/index.html', context)
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
@@ -99,17 +102,24 @@ def get_dealer_details(request, dealerId):
         review_texts = '\n'.join([review.review + " " + review.sentiment for review in reviews])
         # Return a list of dealer short name
         return HttpResponse(review_texts)
+
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
 # ...
+@csrf_exempt
 def add_review(request, dealerId):
     review = {}
     json_payload = {}
     url = f"https://fynnpapadopo-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
     if request.method == "POST":
-        review["time"] = datetime.utcnow().isoformat()
+        review['name'] = request.user.username
         review["dealership"] = dealerId
         review["review"] = "This is a great car dealer"
+        review["purchase"] = True
+        review["purchase_date"] = datetime.utcnow()
+        review["car_make"] = "CAR"
+        review["car_model"] = "CAR"
+        review["car_year"] = 2022
         json_payload["review"] = review
-        result = post_request(url, json_payload, dealerId=dealerId)
-        print(result)
+        result = restapis.post_request(url, json_payload, dealerId=dealerId)
+        return HttpResponse(result)
