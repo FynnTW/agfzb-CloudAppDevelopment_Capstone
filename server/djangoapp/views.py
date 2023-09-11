@@ -10,6 +10,7 @@ from datetime import datetime
 import logging
 import json
 from . import restapis
+from . import models
 from django.views.decorators.csrf import csrf_exempt
 
 # Get an instance of a logger
@@ -94,14 +95,19 @@ def get_dealerships(request):
 # def get_dealer_details(request, dealer_id):
 # ...
 def get_dealer_details(request, dealerId):
+    context={}
     if request.method == "GET":
         url = f"https://fynnpapadopo-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews?id={dealerId}"
         # Get dealers from the URL
         reviews = restapis.get_dealer_reviews_from_cf(url, dealerId)
         # Concat all dealer's short name
         review_texts = '\n'.join([review.review + " " + review.sentiment for review in reviews])
+        context['reviews'] = reviews
+        context['dealer_id'] = dealerId
+        context['carModels'] = models.CarModel.objects.all().filter(dealer_id=dealerId)
+        context['carMakes'] = models.CarMake.objects.all().filter()
         # Return a list of dealer short name
-        return HttpResponse(review_texts)
+        return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
@@ -113,13 +119,13 @@ def add_review(request, dealerId):
     url = f"https://fynnpapadopo-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
     if request.method == "POST":
         review['name'] = request.user.username
+        review['id'] = request.user.username
         review["dealership"] = dealerId
-        review["review"] = "This is a great car dealer"
-        review["purchase"] = True
-        review["purchase_date"] = datetime.utcnow()
-        review["car_make"] = "CAR"
-        review["car_model"] = "CAR"
-        review["car_year"] = 2022
+        review["car_model"] = request.POST['car_model']
+        review["review"] = request.POST['review'] + " " + review["car_make"]
+        review["purchase"] = request.POST['purchase']
+        review["purchase_date"] = request.POST['purchase_date']
+        review["car_year"] = models.CarModel.objects.get(review["car_model"]).year 
         json_payload["review"] = review
         result = restapis.post_request(url, json_payload, dealerId=dealerId)
-        return HttpResponse(result)
+        return redirect("djangoapp:index")

@@ -10,9 +10,97 @@
     <body>
 
     <!--Add a nav bar here -->
-
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Car Dealership</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if user.is_authenticated %}
+                    <li>
+                        <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                        <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Username" name="username" >
+                                <input type="password" class="form-control" placeholder="Password" name="psw" >
+                                <button class="btn btn-primary" type="submit">Login</button>
+                                <a class="btn btn-link" href="{% url 'djangoapp:registration' %}">Sign Up</a>
+                            </div>
+                        </form>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'djangoapp:index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'djangoapp:about' %}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <!-- Add reviews as cards -->
-
+    <div class="container">
+        <div class="card-deck">
+            {% for review in reviews %}
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            {{review.name}}
+                        </h4>
+                        <p class="card-text">
+                            {{review.review}}
+                        </p>
+                      </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% if user.is_authenticated %}
+    <div class="container">
+        <form action="{% url 'djangoapp:add_review' dealerId=dealer_id  %}" method="post">
+            <div class="container">
+            <h1>Add Review</h1>
+            <hr>
+            <div class="container">
+                <input type="text" placeholder="Enter Review: " name="review" required>
+            </div>
+            <div class="container">
+                <input type="checkbox" id="purchase" name="purchase">Purchased?</checkbox>
+            </div>
+            <div class="container">
+                <label for="purchase_date">Purchase date:</label>
+                <input type="date" id="purchase_date" name="purchase_date">
+            </div>
+            <div class="container">
+                <label for="car_models">Choose a car model:</label>
+                <select name="car_model" id="car_models" class="form-select"><br>
+                    {% for car in vehicles %}
+                        <option selected value={{car_model.dealer_id}}>{{car_model.car_brand}} {{car_model.car_model}} - {{car_model.year}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="container">
+                <div>
+                    {% csrf_token %}
+                    <button class="button" type="submit">Post review</button>
+                </div>
+            </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
     </body>
 
 </html>
