@@ -116,6 +116,11 @@ def get_dealer_details(request, dealerId):
 def add_review(request, dealerId):
     review = {}
     json_payload = {}
+    if request.method == "GET":
+        context={}
+        context['dealer_id'] = dealerId
+        context['carModels'] = models.CarModel.objects.all()
+        return render(request, 'djangoapp/add_review.html', context)
     url = f"https://fynnpapadopo-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
     if request.method == "POST":
         review['name'] = request.user.username
@@ -128,4 +133,4 @@ def add_review(request, dealerId):
         review["car_year"] = models.CarModel.objects.get(review["car_model"]).year 
         json_payload["review"] = review
         result = restapis.post_request(url, json_payload, dealerId=dealerId)
-        return redirect("djangoapp:index")
+        return rediect("djangoapp:index")

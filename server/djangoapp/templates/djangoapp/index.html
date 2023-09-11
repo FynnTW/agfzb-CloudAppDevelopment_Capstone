@@ -77,7 +77,7 @@
                 <td>{{ dealer.city }}</td>
                 <td>{{ dealer.address}} </td>
                 <td>{{ dealer.zip}} </td>
-                <td>{{ dealer.state}} </td>
+                <td>{{ dealer.st}} </td>
             </tr>
             {% endfor%}
         </tbody>
@@ -86,4 +86,10 @@
     <footer class="container-fluid text-center">
         <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
     </footer>
+    
+    <script>
+        $(function() {
+        $('#table').bootstrapTable()
+        })
+    </script>
 </html>
